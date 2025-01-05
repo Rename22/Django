@@ -1,0 +1,94 @@
+{% extends 'plantilla.html' %}
+
+{% block title %}Comprar Libro{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Recuadro con estilo de tarjeta -->
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3>Comprar "{{ libro.titulo }}"</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-center"><strong>Precio:</strong> ${{ libro.precio }}</p>
+                    <div class="modal-header d-flex justify-content-center">
+                        <h5 class="modal-title text-center">Detalles de la Compra</h5>
+                    </div>
+                    
+                    <!-- Formulario para completar la compra -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="lugar_encuentro" class="form-label">Lugar de Encuentro:</label>
+                            <input type="text" name="lugar_encuentro" id="lugar_encuentro" class="form-control" placeholder="Ej: Parque central" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_encuentro" class="form-label">Fecha de Encuentro:</label>
+                            <input type="date" name="fecha_encuentro" id="fecha_encuentro" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="hora_encuentro" class="form-label">Hora de Encuentro:</label>
+                            <select name="hora_encuentro" id="hora_encuentro" class="form-select" required>
+                                <!-- Opciones generadas dinámicamente -->
+                            </select>
+                        </div>
+                        <div class="modal-footer d-flex justify-content-center">
+                            <button type="submit" class="btn btn-success mx-2">Aceptar</button>
+                            <a href="/inicio/" class="btn btn-danger mx-2">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
+        const currentDate = String(today.getDate()).padStart(2, '0');
+        const currentHour = today.getHours();
+        const currentMinutes = today.getMinutes();
+
+        const fechaEncuentro = document.getElementById('fecha_encuentro');
+        const horaEncuentro = document.getElementById('hora_encuentro');
+
+        // Establecer la fecha mínima en el campo de fecha
+        const minDate = `${currentYear}-${currentMonth}-${currentDate}`;
+        fechaEncuentro.setAttribute('min', minDate);
+
+        // Función para generar opciones de horas y minutos
+        function generarHoras(fechaSeleccionada) {
+            horaEncuentro.innerHTML = ''; // Limpiar opciones previas
+            const esHoy = fechaSeleccionada === minDate;
+
+            for (let hour = esHoy ? currentHour : 0; hour < 24; hour++) {
+                if (esHoy && hour === currentHour && currentMinutes >= 30) {
+                    // Mostrar solo media hora si es la misma hora actual
+                    horaEncuentro.innerHTML += `<option value="${String(hour).padStart(2, '0')}:30">${String(hour).padStart(2, '0')}:30</option>`;
+                } else if (esHoy && hour === currentHour) {
+                    // Mostrar hora cerrada y media hora si es la hora actual
+                    horaEncuentro.innerHTML += `<option value="${String(hour).padStart(2, '0')}:00">${String(hour).padStart(2, '0')}:00</option>`;
+                    horaEncuentro.innerHTML += `<option value="${String(hour).padStart(2, '0')}:30">${String(hour).padStart(2, '0')}:30</option>`;
+                } else {
+                    // Mostrar todas las horas cerradas y medias horas para fechas futuras
+                    horaEncuentro.innerHTML += `<option value="${String(hour).padStart(2, '0')}:00">${String(hour).padStart(2, '0')}:00</option>`;
+                    horaEncuentro.innerHTML += `<option value="${String(hour).padStart(2, '0')}:30">${String(hour).padStart(2, '0')}:30</option>`;
+                }
+            }
+        }
+
+        // Generar horas para la fecha actual por defecto
+        generarHoras(minDate);
+
+        // Actualizar las horas cuando se cambie la fecha
+        fechaEncuentro.addEventListener('change', function () {
+            generarHoras(fechaEncuentro.value);
+        });
+    });
+</script>
+{% endblock %}

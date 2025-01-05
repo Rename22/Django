@@ -1,0 +1,86 @@
+{% extends 'plantilla.html' %}
+
+{% block title %}Book Market{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Mis Solicitudes de Compra</h2>
+
+    {% if solicitudes %}
+        <!-- Campo de búsqueda -->
+        <div class="mb-3">
+            <input type="text" id="filtro" class="form-control" placeholder="Buscar en las solicitudes...">
+        </div>
+
+        <table class="table table-bordered mt-4" id="tabla-solicitudes">
+            <thead class="table-primary text-center">
+                <tr>
+                    <th>Libro</th>
+                    <th>Precio</th>
+                    <th>Vendedor</th>
+                    <th>Lugar</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody class="text-center align-middle">
+                {% for solicitud in solicitudes %}
+                <tr>
+                    <td>{{ solicitud.libro.titulo }}</td>
+                    <td>${{ solicitud.libro.precio }}</td>
+                    <td>{{ solicitud.libro.vendedor.nombre }} {{ solicitud.libro.vendedor.apellido }}</td>
+                    <td>{{ solicitud.lugar_encuentro }}</td>
+                    <td>{{ solicitud.fecha_encuentro }}</td>
+                    <td>{{ solicitud.hora_encuentro }}</td>
+                    <td>
+                        {% if solicitud.estado == 'Rechazada' %}
+                            <span class="badge bg-danger">Rechazada</span>
+                            <p class="mt-2 text-danger">Motivo: {{ solicitud.motivo }}</p>
+                        {% elif solicitud.estado == 'Cancelada' %}
+                            <span class="badge bg-secondary">Cancelada</span>
+                            <p class="mt-2 text-secondary">Motivo: {{ solicitud.motivo }}</p>
+                        {% elif solicitud.estado == 'Pendiente' %}
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        {% elif solicitud.estado == 'Aceptada' %}
+                            <span class="badge bg-primary">Aceptada</span>
+                        {% elif solicitud.estado == 'Completada' %}
+                            <span class="badge bg-success">Completada</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-center">No tienes solicitudes de compra registradas.</p>
+    {% endif %}
+</div>
+
+<!-- Script para filtro en tiempo real -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const filtro = document.getElementById('filtro');
+        const tabla = document.getElementById('tabla-solicitudes');
+        const filas = tabla.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+        filtro.addEventListener('input', function () {
+            const texto = filtro.value.toLowerCase();
+
+            for (let fila of filas) {
+                const columnas = fila.getElementsByTagName('td');
+                let coincide = false;
+
+                for (let columna of columnas) {
+                    if (columna.textContent.toLowerCase().includes(texto)) {
+                        coincide = true;
+                        break;
+                    }
+                }
+
+                fila.style.display = coincide ? '' : 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

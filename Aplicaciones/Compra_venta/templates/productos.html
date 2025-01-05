@@ -1,0 +1,83 @@
+{% extends 'plantilla.html' %}
+
+{% block title %}Book Market{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center text-primary mb-4">Mis Libros Publicados</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <input type="text" id="buscador" class="form-control w-50" placeholder="Buscar por título, autor o categoría...">
+        <a href="/libros/agregar/" class="btn btn-success">Agregar Nuevo Libro</a>
+        
+    </div>
+
+    <div class="row" id="contenedor-libros">
+        {% for libro in libros %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4 libro-card">
+            <div class="card shadow-sm h-100 border-0">
+                {% if libro.imagen %}
+                <img src="{{ libro.imagen.url }}" alt="{{ libro.titulo }}" class="card-img-top" style="height: 200px; object-fit: contain; border-radius: 10px 10px 0 0;">
+                {% else %}
+                <img src="/static/default.png" alt="Sin imagen disponible" class="card-img-top" style="height: 200px; object-fit: contain; border-radius: 10px 10px 0 0;">
+                {% endif %}
+
+                <div class="card-body text-center">
+                    <h5 class="card-title text-truncate text-primary">{{ libro.titulo }}</h5>
+                    <p class="card-text text-muted"><strong>Autor:</strong> {{ libro.autor }}</p>
+                    <p class="card-text"><strong>Estado:</strong> {{ libro.condicion }}</p>
+                    <p class="card-text"><strong>Categoría:</strong> {{ libro.categoria }}</p>
+                    <p class="card-text text-success"><strong>Precio:</strong> ${{ libro.precio }}</p>
+                </div>
+                <div class="card-footer text-center bg-light">
+                    {% if libro.vendido %}
+                        <span class="badge bg-success">Vendido</span>
+                    {% elif libro.en_proceso %}
+                        <button class="btn btn-warning btn-sm" disabled 
+                                data-bs-toggle="tooltip" data-bs-placement="top" 
+                                title="No puedes editar este libro mientras la venta esté en proceso.">
+                            Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm" disabled 
+                                data-bs-toggle="tooltip" data-bs-placement="top" 
+                                title="No puedes eliminar este libro mientras la venta esté en proceso.">
+                            Eliminar
+                        </button>
+                    {% else %}
+                        <a href="/libros/editar/{{ libro.id }}/" class="btn btn-primary btn-sm">Editar</a>
+                        <form action="/libros/eliminar/{{ libro.id }}/" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Script para búsqueda en tiempo real -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const buscador = document.getElementById('buscador');
+        const contenedorLibros = document.getElementById('contenedor-libros');
+        const tarjetas = contenedorLibros.getElementsByClassName('libro-card');
+
+        buscador.addEventListener('input', function() {
+            const texto = buscador.value.toLowerCase();
+
+            for (let tarjeta of tarjetas) {
+                const titulo = tarjeta.querySelector('.card-title').textContent.toLowerCase();
+                const autor = tarjeta.querySelector('.card-text:nth-child(2)').textContent.toLowerCase();
+                const categoria = tarjeta.querySelector('.card-text:nth-child(4)').textContent.toLowerCase();
+
+                if (titulo.includes(texto) || autor.includes(texto) || categoria.includes(texto)) {
+                    tarjeta.style.display = '';
+                } else {
+                    tarjeta.style.display = 'none';
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

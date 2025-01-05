@@ -1,0 +1,98 @@
+{% extends 'plantilla.html' %}
+
+{% block title %}Book Market{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center text-primary mb-4">Bienvenido, {{ usuario.nombre }}!</h1>
+
+    <!-- Formulario de Filtros -->
+    <form method="get" class="mb-4 p-3 bg-light rounded shadow-sm">
+        <div class="row g-3">
+            <!-- Buscar por título o autor -->
+            <div class="col-md-3">
+                <input type="text" name="busqueda" class="form-control" placeholder="Buscar por título o autor" value="{{ request.GET.busqueda }}">
+            </div>
+
+            <!-- Filtrar por categoría -->
+            <div class="col-md-3">
+                <select name="categoria" class="form-select">
+                    <option value="">Todas las categorías</option>
+                    <option value="Ficción" {% if request.GET.categoria == 'Ficción' %}selected{% endif %}>Ficción</option>
+                    <option value="No Ficción" {% if request.GET.categoria == 'No Ficción' %}selected{% endif %}>No Ficción</option>
+                    <option value="Fantasía" {% if request.GET.categoria == 'Fantasía' %}selected{% endif %}>Fantasía</option>
+                    <option value="Ciencia Ficción" {% if request.GET.categoria == 'Ciencia Ficción' %}selected{% endif %}>Ciencia Ficción</option>
+                    <option value="Romance" {% if request.GET.categoria == 'Romance' %}selected{% endif %}>Romance</option>
+                    <option value="Misterio" {% if request.GET.categoria == 'Misterio' %}selected{% endif %}>Misterio</option>
+                    <option value="Historia" {% if request.GET.categoria == 'Historia' %}selected{% endif %}>Historia</option>
+                    <option value="Biografía" {% if request.GET.categoria == 'Biografía' %}selected{% endif %}>Biografía</option>
+                    <option value="Infantil" {% if request.GET.categoria == 'Infantil' %}selected{% endif %}>Infantil</option>
+                    <option value="Autoayuda" {% if request.GET.categoria == 'Autoayuda' %}selected{% endif %}>Autoayuda</option>
+                    <option value="Otros" {% if request.GET.categoria == 'Otros' %}selected{% endif %}>Otros</option>
+                </select>
+            </div>
+
+            <!-- Filtrar por precio mínimo -->
+            <div class="col-md-2">
+                <input type="number" name="precio_min" class="form-control" placeholder="Precio mínimo" value="{{ request.GET.precio_min }}">
+            </div>
+
+            <!-- Filtrar por precio máximo -->
+            <div class="col-md-2">
+                <input type="number" name="precio_max" class="form-control" placeholder="Precio máximo" value="{{ request.GET.precio_max }}">
+            </div>
+
+            <!-- Botón de filtrar -->
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Lista de Libros -->
+    <div class="row">
+        {% for libro in libros %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card shadow-sm h-100 border-0">
+                    {% if libro.imagen %}
+                    <img src="{{ libro.imagen.url }}" alt="{{ libro.titulo }}" class="card-img-top img-fluid rounded-top" style="height: 200px; object-fit: contain;">
+                    {% else %}
+                    <img src="/static/default.png" alt="Sin imagen disponible" class="card-img-top img-fluid rounded-top" style="height: 200px; object-fit: contain;">
+                    {% endif %}
+
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-truncate text-primary">{{ libro.titulo }}</h5>
+                        <p class="card-text"><strong>Autor:</strong> {{ libro.autor }}</p>
+                        <p class="card-text"><strong>Estado:</strong> {{ libro.condicion }}</p>
+                        <p class="card-text"><strong>Categoría:</strong> {{ libro.categoria }}</p>
+                        <p class="card-text text-success"><strong>Precio:</strong> ${{ libro.precio }}</p>
+                        <p class="card-text"><strong>Vendedor:</strong> {{ libro.vendedor.nombre }} {{ libro.vendedor.apellido }}</p>
+                    </div>
+                    <div class="card-footer text-center bg-light">
+                        <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#sinopsisModal{{ libro.id }}">Sinopsis</button>
+                        <a href="/comprar/{{ libro.id }}/" class="btn btn-success btn-sm">Comprar</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal para la sinopsis -->
+            <div class="modal fade" id="sinopsisModal{{ libro.id }}" tabindex="-1" aria-labelledby="sinopsisLabel{{ libro.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title w-100 text-center" id="sinopsisLabel{{ libro.id }}">Sinopsis</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>{{ libro.descripcion|default:"Sin sinopsis disponible." }}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

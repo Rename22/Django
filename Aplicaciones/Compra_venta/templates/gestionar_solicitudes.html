@@ -1,0 +1,99 @@
+{% extends 'plantilla.html' %}
+
+{% block title %}Book Market{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center text-primary mb-4">Solicitudes de Compra</h2>
+
+    <!-- Solicitudes Pendientes -->
+    <h4 class="text-warning">Pendientes:</h4>
+    {% if ordenes_pendientes %}
+        <table class="table table-striped table-hover table-bordered mt-4">
+            <thead class="table-warning text-center">
+                <tr>
+                    <th>Libro</th>
+                    <th>Precio</th>
+                    <th>Comprador</th>
+                    <th>Lugar</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody class="text-center align-middle">
+                {% for orden in ordenes_pendientes %}
+                <tr>
+                    <td class="fw-bold text-secondary">{{ orden.libro.titulo }}</td>
+                    <td class="text-success fw-bold">${{ orden.libro.precio }}</td>
+                    <td>{{ orden.comprador.nombre }} {{ orden.comprador.apellido }}</td>
+                    <td class="text-muted">{{ orden.lugar_encuentro }}</td>
+                    <td>{{ orden.fecha_encuentro }}</td>
+                    <td>{{ orden.hora_encuentro }}</td>
+                    <td>
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="orden_id" value="{{ orden.id }}">
+                            <button type="submit" name="accion" value="aceptar" class="btn btn-success btn-sm">Aceptar</button>
+                        </form>
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="orden_id" value="{{ orden.id }}">
+                            <textarea name="motivo" class="form-control mb-2" placeholder="Motivo del rechazo" rows="2" required></textarea>
+                            <button type="submit" name="accion" value="rechazar" class="btn btn-danger btn-sm">Rechazar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info text-center mt-4">
+            No tienes solicitudes pendientes.
+        </div>
+    {% endif %}
+
+    <!-- Solicitudes Aceptadas -->
+    <h4 class="text-primary mt-5">Aceptadas:</h4>
+    {% if ordenes_aceptadas %}
+        <table class="table table-striped table-hover table-bordered mt-4">
+            <thead class="table-primary text-center">
+                <tr>
+                    <th>Libro</th>
+                    <th>Precio</th>
+                    <th>Comprador</th>
+                    <th>Lugar</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody class="text-center align-middle">
+                {% for orden in ordenes_aceptadas %}
+                <tr>
+                    <td class="fw-bold text-secondary">{{ orden.libro.titulo }}</td>
+                    <td class="text-success fw-bold">${{ orden.libro.precio }}</td>
+                    <td>{{ orden.comprador.nombre }} {{ orden.comprador.apellido }}</td>
+                    <td class="text-muted">{{ orden.lugar_encuentro }}</td>
+                    <td>{{ orden.fecha_encuentro }}</td>
+                    <td>{{ orden.hora_encuentro }}</td>
+                    <td>
+                        <a href="/completar/{{ orden.id }}/" class="btn btn-success btn-sm">Marcar como Vendido</a>
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="orden_id" value="{{ orden.id }}">
+                            <textarea name="motivo" class="form-control mb-2" placeholder="Motivo de la cancelación" rows="2" required></textarea>
+                            <button type="submit" name="accion" value="cancelar" class="btn btn-danger btn-sm">Cancelar Venta</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info text-center mt-4">
+            No tienes solicitudes aceptadas pendientes de completar.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
